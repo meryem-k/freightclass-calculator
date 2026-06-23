@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FreightClass — NMFC Density Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#090e1f;
+  --card:rgba(15,23,42,0.75);
+  --border:rgba(255,255,255,0.08);
+  --text:#f1f5f9;
+  --muted:#64748b;
+  --accent:#818cf8;
+  --accent-dim:rgba(129,140,248,0.12);
+  --input-bg:rgba(255,255,255,0.04);
+  --input-border:rgba(255,255,255,0.1);
+  --danger:#f87171;
+  --radius:18px;
+  --shadow:0 32px 64px rgba(0,0,0,0.6);
+}
+[data-theme="light"]{
+  --bg:#eef2ff;
+  --card:rgba(255,255,255,0.82);
+  --border:rgba(0,0,0,0.07);
+  --text:#0f172a;
+  --muted:#94a3b8;
+  --accent:#6366f1;
+  --accent-dim:rgba(99,102,241,0.1);
+  --input-bg:rgba(0,0,0,0.03);
+  --input-border:rgba(0,0,0,0.1);
+  --shadow:0 20px 40px rgba(0,0,0,0.1);
+}
+
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  transition:background 0.3s,color 0.3s;
+}
+
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:radial-gradient(ellipse 900px 600px at 15% -10%,rgba(99,102,241,0.18) 0%,transparent 65%),
+             radial-gradient(ellipse 700px 500px at 85% 110%,rgba(16,185,129,0.12) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
+}
+[data-theme="light"] body::before{
+  background:radial-gradient(ellipse 900px 600px at 15% -10%,rgba(99,102,241,0.12) 0%,transparent 65%),
+             radial-gradient(ellipse 700px 500px at 85% 110%,rgba(16,185,129,0.08) 0%,transparent 65%);
+}
+
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:100;
+  padding:16px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(24px);
+  background:rgba(9,14,31,0.55);
+}
+[data-theme="light"] header{background:rgba(238,242,255,0.75);}
+
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,#6366f1,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  box-shadow:0 0 18px rgba(99,102,241,0.45);
+}
+.logo-text h1{font-size:18px;font-weight:800;letter-spacing:-0.5px;background:linear-gradient(120deg,var(--text),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-text span{font-size:11px;color:var(--muted);display:block;margin-top:-2px;-webkit-text-fill-color:var(--muted)}
+
+.header-right{display:flex;align-items:center;gap:10px}
+.theme-btn{
+  background:var(--input-bg);border:1px solid var(--border);
+  color:var(--text);padding:7px 14px;border-radius:50px;cursor:pointer;
+  font-size:12px;font-weight:500;font-family:inherit;
+  display:flex;align-items:center;gap:7px;transition:all 0.2s;
+}
+.theme-btn:hover{background:var(--accent-dim);border-color:var(--accent)}
+
+/* MAIN GRID */
+main{
+  position:relative;z-index:1;
+  display:grid;
+  grid-template-columns:1fr 200px 1fr;
+  gap:20px;
+  max-width:1160px;margin:0 auto;
+  padding:28px 24px 40px;
+  align-items:start;
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:24px;
+  backdrop-filter:blur(24px);
+  box-shadow:var(--shadow);
+}
+.card-title{
+  font-size:10px;font-weight:700;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:18px;
+}
+
+/* UNIT TOGGLE */
+.unit-toggle{
+  display:inline-flex;
+  background:var(--input-bg);border:1px solid var(--input-border);
+  border-radius:7px;overflow:hidden;
+}
+.unit-toggle button{
+  background:none;border:none;color:var(--muted);
+  padding:4px 9px;font-size:10px;font-weight:700;letter-spacing:0.05em;
+  cursor:pointer;transition:all 0.15s;font-family:inherit;
+}
+.unit-toggle button.active{background:var(--accent);color:#fff}
+
+/* PIECE TABLE */
+.col-heads{
+  display:grid;
+  grid-template-columns:42px 1fr 1fr 1fr 1fr 28px;
+  gap:5px;margin-bottom:5px;
+}
+.col-head{font-size:9px;font-weight:600;color:var(--muted);text-align:center;letter-spacing:0.06em;text-transform:uppercase}
+
+.pieces-list{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+
+.piece-row{
+  display:grid;
+  grid-template-columns:42px 1fr 1fr 1fr 1fr 28px;
+  gap:5px;align-items:end;
+  padding:10px;
+  background:var(--input-bg);
+  border:1px solid var(--input-border);
+  border-radius:11px;
+  transition:border-color 0.2s;
+}
+.piece-row:focus-within{border-color:var(--accent)}
+
+input[type=number]{
+  width:100%;
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--input-border);
+  border-radius:7px;color:var(--text);
+  padding:7px 6px;font-size:13px;font-family:inherit;
+  text-align:center;outline:none;
+  -moz-appearance:textfield;
+  transition:border-color 0.2s,box-shadow 0.2s;
+}
+[data-theme="light"] input[type=number]{background:rgba(0,0,0,0.04)}
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input[type=number]:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+input[type=number]::placeholder{color:var(--muted);opacity:0.5}
+
+.del-btn{
+  background:none;border:1px solid var(--border);
+  border-radius:6px;color:var(--muted);
+  width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:13px;line-height:1;
+  transition:all 0.15s;padding:0;font-family:inherit;
+}
+.del-btn:hover{background:rgba(248,113,113,0.1);border-color:var(--danger);color:var(--danger)}
+
+.add-btn{
+  width:100%;
+  background:var(--accent-dim);border:1.5px dashed var(--accent);
+  color:var(--accent);padding:9px;border-radius:10px;
+  cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all 0.2s;letter-spacing:0.02em;
+}
+.add-btn:hover{background:rgba(129,140,248,0.22)}
+
+/* UNITS ROW */
+.units-row{
+  display:flex;gap:10px;align-items:center;
+  margin-top:14px;padding-top:14px;
+  border-top:1px solid var(--border);
+}
+.units-row label{font-size:11px;color:var(--muted);flex:1}
+
+/* BOX PREVIEW */
+.box-preview{
+  margin-top:20px;padding-top:18px;
+  border-top:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.box-preview-lbl{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+
+.scene{
+  width:130px;height:130px;
+  display:flex;align-items:center;justify-content:center;
+  perspective:350px;
+}
+.box3d{
+  position:relative;
+  transform-style:preserve-3d;
+  animation:rotateBox 9s linear infinite;
+}
+@keyframes rotateBox{
+  from{transform:rotateX(-22deg) rotateY(0deg)}
+  to{transform:rotateX(-22deg) rotateY(360deg)}
+}
+.face{
+  position:absolute;
+  backface-visibility:visible;
+  border:1px solid rgba(129,140,248,0.5);
+  top:50%;left:50%;
+}
+
+/* GAUGE CARD */
+.gauge-card{display:flex;flex-direction:column;align-items:center;gap:14px}
+
+.gauge-outer{position:relative;width:36px;height:300px}
+.gauge-bar{
+  width:100%;height:100%;
+  border-radius:18px;
+  background:linear-gradient(to bottom,
+    #10b981 0%, #22c55e 12%, #84cc16 25%,
+    #eab308 38%, #f59e0b 50%,
+    #f97316 62%, #ef4444 78%, #dc2626 100%
+  );
+  box-shadow:0 0 24px rgba(0,0,0,0.4);
+  overflow:visible;
+}
+.gauge-dot{
+  position:absolute;
+  left:50%;
+  width:20px;height:20px;
+  border-radius:50%;
+  transform:translate(-50%,50%);
+  background:#fff;
+  transition:bottom 0.7s cubic-bezier(0.34,1.4,0.64,1), color 0.5s;
+  bottom:50%;
+  z-index:2;
+}
+.gauge-dot::after{
+  content:'';position:absolute;inset:3px;border-radius:50%;
+  background:currentColor;
+}
+.gauge-dot::before{
+  content:'';position:absolute;
+  inset:-4px;border-radius:50%;
+  background:currentColor;opacity:0.3;
+  animation:dotPulse 2s ease-in-out infinite;
+}
+@keyframes dotPulse{
+  0%,100%{transform:scale(1);opacity:0.3}
+  50%{transform:scale(1.5);opacity:0.1}
+}
+
+.gauge-scale{
+  position:absolute;right:calc(100% + 6px);top:0;height:100%;
+  display:flex;flex-direction:column;justify-content:space-between;
+}
+.gauge-scale span{font-size:8px;color:var(--muted);white-space:nowrap;text-align:right}
+
+.density-out{text-align:center}
+.density-num{
+  font-size:28px;font-weight:800;line-height:1;
+  transition:color 0.5s;color:var(--muted);
+}
+.density-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* RESULT CARD */
+.result-empty{
+  text-align:center;padding:20px 0;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.result-empty .big-icon{font-size:52px;opacity:0.2}
+.result-empty p{font-size:13px;color:var(--muted);line-height:1.6;max-width:200px}
+
+.result-content{display:none}
+
+.class-wrap{text-align:center;margin:4px 0 18px}
+.class-sublabel{font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.class-num{
+  font-size:96px;font-weight:900;line-height:0.9;letter-spacing:-4px;
+  background:linear-gradient(135deg,var(--cc,#818cf8),var(--cc2,#a5b4fc));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 24px var(--cg,rgba(129,140,248,0.45)));
+  transition:all 0.35s;
+}
+.class-num.bump{animation:bump 0.4s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes bump{
+  0%{transform:scale(0.82);opacity:0.4}
+  60%{transform:scale(1.06)}
+  100%{transform:scale(1);opacity:1}
+}
+.class-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 13px;border-radius:50px;
+  font-size:11px;font-weight:700;margin-top:8px;
+  transition:all 0.35s;
+  border:1px solid currentColor;
+}
+
+.stats-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin:0 0 14px;
+}
+.stat{
+  background:var(--input-bg);border:1px solid var(--border);
+  border-radius:10px;padding:11px 8px;text-align:center;
+}
+.stat-val{font-size:15px;font-weight:700;margin-bottom:2px}
+.stat-lbl{font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)}
+
+.class-desc{
+  font-size:12px;color:var(--muted);line-height:1.65;
+  padding:12px 14px;
+  background:var(--input-bg);
+  border:1px solid var(--border);
+  border-left:3px solid var(--accent);
+  border-radius:0 10px 10px 0;
+}
+.class-desc strong{color:var(--text);font-weight:600}
+
+/* RESPONSIVE */
+@media(max-width:860px){
+  main{grid-template-columns:1fr;padding:16px}
+  .gauge-card{flex-direction:row;flex-wrap:wrap;justify-content:center;gap:16px}
+  .gauge-outer{width:260px;height:36px}
+  .gauge-bar{
+    background:linear-gradient(to right,
+      #10b981, #22c55e, #84cc16,
+      #eab308, #f59e0b, #f97316, #ef4444, #dc2626
+    );
+    border-radius:18px;
+  }
+  .gauge-dot{
+    bottom:50% !important;
+    left:var(--gdot-x,50%) !important;
+    transform:translate(-50%,50%);
+    top:auto;
+  }
+  .gauge-scale{
+    right:auto;left:0;
+    flex-direction:row;width:100%;height:auto;
+    top:calc(100% + 6px);
+    justify-content:space-between;
+  }
+  .gauge-scale span{text-align:left}
+}
+
+@media(max-width:480px){
+  header{padding:12px 16px}
+  .logo-text h1{font-size:15px}
+  .class-num{font-size:72px}
+}
+
+footer{
+  position:relative;z-index:1;
+  text-align:center;padding:16px;
+  font-size:11px;color:var(--muted);
+  border-top:1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📦</div>
+    <div class="logo-text">
+      <h1>FreightClass</h1>
+      <span>NMFC Density Calculator</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">
+      <span>☀️</span> Light Mode
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── INPUT CARD ── -->
+  <div class="card">
+    <div class="card-title">Shipment Details</div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span style="font-size:12px;color:var(--muted)">Pieces</span>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div>
+          <div style="font-size:9px;color:var(--muted);text-align:center;margin-bottom:3px;letter-spacing:0.06em;text-transform:uppercase">Dims</div>
+          <div class="unit-toggle" id="dim-toggle">
+            <button class="active" onclick="setUnit('dim','in',this)">IN</button>
+            <button onclick="setUnit('dim','cm',this)">CM</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:9px;color:var(--muted);text-align:center;margin-bottom:3px;letter-spacing:0.06em;text-transform:uppercase">Weight</div>
+          <div class="unit-toggle" id="wt-toggle">
+            <button class="active" onclick="setUnit('wt','lbs',this)">LBS</button>
+            <button onclick="setUnit('wt','kg',this)">KG</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-heads">
+      <div class="col-head">Qty</div>
+      <div class="col-head" id="hdr-l">L (in)</div>
+      <div class="col-head" id="hdr-w">W (in)</div>
+      <div class="col-head" id="hdr-h">H (in)</div>
+      <div class="col-head" id="hdr-wt">Wt (lbs)</div>
+      <div></div>
+    </div>
+
+    <div class="pieces-list" id="pieces-list"></div>
+
+    <button class="add-btn" onclick="addPiece()">＋ Add Piece</button>
+
+    <div class="box-preview">
+      <div class="box-preview-lbl">Shipment Preview</div>
+      <div class="scene">
+        <div class="box3d" id="box3d">
+          <div class="face" id="f-front"></div>
+          <div class="face" id="f-back"></div>
+          <div class="face" id="f-right"></div>
+          <div class="face" id="f-left"></div>
+          <div class="face" id="f-top"></div>
+          <div class="face" id="f-bottom"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── GAUGE CARD ── -->
+  <div class="card gauge-card">
+    <div class="card-title">Density</div>
+    <div class="gauge-outer" id="gauge-outer">
+      <div class="gauge-bar">
+        <div class="gauge-dot" id="gauge-dot" style="color:#818cf8;bottom:50%"></div>
+      </div>
+      <div class="gauge-scale">
+        <span>50+</span>
+        <span>35</span>
+        <span>22</span>
+        <span>13</span>
+        <span>8</span>
+        <span>5</span>
+        <span>2</span>
+        <span>&lt;1</span>
+      </div>
+    </div>
+    <div class="density-out">
+      <div class="density-num" id="density-num">—</div>
+      <div class="density-lbl">lbs / ft³</div>
+    </div>
+  </div>
+
+  <!-- ── RESULT CARD ── -->
+  <div class="card" id="result-card">
+    <div class="card-title">Freight Class</div>
+
+    <div class="result-empty" id="result-empty">
+      <div class="big-icon">📋</div>
+      <p>Enter dimensions and weight to calculate your NMFC freight class</p>
+    </div>
+
+    <div class="result-content" id="result-content">
+      <div class="class-wrap">
+        <div class="class-sublabel">NMFC Class</div>
+        <div class="class-num" id="class-num">—</div>
+        <div><span class="class-badge" id="class-badge">—</span></div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-val" id="sv-weight">—</div><div class="stat-lbl">Total Weight</div></div>
+        <div class="stat"><div class="stat-val" id="sv-vol">—</div><div class="stat-lbl">Cubic Feet</div></div>
+        <div class="stat"><div class="stat-val" id="sv-density">—</div><div class="stat-lbl">Density</div></div>
+        <div class="stat"><div class="stat-val" id="sv-pieces">—</div><div class="stat-lbl">Total Pieces</div></div>
+      </div>
+
+      <div class="class-desc" id="class-desc"></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>FreightClass · NMFC density-based calculator · For reference only — verify with your carrier</footer>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let pieces = [];
+let dimUnit = 'in';
+let wtUnit  = 'lbs';
+let pieceId = 0;
+
+// ─── FREIGHT CLASS TABLE ──────────────────────────────────────────────────────
+const FC_TABLE = [
+  {min:50,   fc:50},
+  {min:35,   fc:55},
+  {min:30,   fc:60},
+  {min:22.5, fc:65},
+  {min:15,   fc:70},
+  {min:13.5, fc:77.5},
+  {min:12,   fc:85},
+  {min:10.5, fc:92.5},
+  {min:9,    fc:100},
+  {min:8,    fc:110},
+  {min:7,    fc:125},
+  {min:6,    fc:150},
+  {min:5,    fc:175},
+  {min:4,    fc:200},
+  {min:3,    fc:250},
+  {min:2,    fc:300},
+  {min:1,    fc:400},
+  {min:0,    fc:500},
+];
+
+const FC_INFO = {
+  50:  {label:'Ultra Dense',    desc:'<strong>Metal castings, machinery, steel billets.</strong> Extremely dense freight — the most economical class to ship per unit weight.'},
+  55:  {label:'Very Dense',     desc:'<strong>Bricks, cement, mortar.</strong> Very heavy, compact items with excellent shipping economics.'},
+  60:  {label:'Dense',          desc:'<strong>Car parts, canned food, cast iron.</strong> Dense manufactured goods — efficient use of trailer space.'},
+  65:  {label:'Heavy',          desc:'<strong>Auto parts, bottled beverages, books.</strong> Heavy consumer goods; a common class for packaged products.'},
+  70:  {label:'Heavy-Medium',   desc:'<strong>Auto accessories, food items, engines.</strong> Solid mid-range class for manufactured goods.'},
+  77.5:{label:'Medium-Heavy',   desc:'<strong>Tires, bathroom fixtures, engine parts.</strong> Moderately heavy industrial and consumer goods.'},
+  85:  {label:'Medium',         desc:'<strong>Crated machinery, cast iron stoves.</strong> Bulky but reasonably dense crated equipment.'},
+  92.5:{label:'Medium',         desc:'<strong>Computers, monitors, refrigerators.</strong> Electronics and appliances with standard packaging.'},
+  100: {label:'Standard',       desc:'<strong>Boat covers, wine cases, car covers.</strong> The industry\'s classic "average" density class.'},
+  110: {label:'Standard',       desc:'<strong>Cabinets, framed artwork, table saws.</strong> Packaged goods with moderate density.'},
+  125: {label:'Light-Medium',   desc:'<strong>Small appliances, exhibits.</strong> Bulkier items with lower weight relative to size.'},
+  150: {label:'Light',          desc:'<strong>Bookcases, auto sheet metal.</strong> Large-format items that take up significant trailer space.'},
+  175: {label:'Light',          desc:'<strong>Clothing, stuffed furniture, sofas.</strong> Low-density packaged freight — substantial space per pound.'},
+  200: {label:'Very Light',     desc:'<strong>Aluminum tables, sheet metal parts.</strong> Large, lightweight items — higher cost per pound.'},
+  250: {label:'Very Light',     desc:'<strong>Mattresses, box springs, large TVs.</strong> Very low density with major space impact in the trailer.'},
+  300: {label:'Extremely Light',desc:'<strong>Crated wood cabinets, large furniture.</strong> Occupies a great deal of trailer space per pound.'},
+  400: {label:'Extremely Light',desc:'<strong>Very bulky, very light freight.</strong> Extreme bulk relative to weight — expensive to move.'},
+  500: {label:'Lowest Density', desc:'<strong>Ping pong balls, large plastic items.</strong> Almost no weight for the space consumed — highest class, highest cost.'},
+};
+
+function lookupFC(density) {
+  for (const row of FC_TABLE) if (density >= row.min) return row.fc;
+  return 500;
+}
+
+// ─── CLASS COLORS ─────────────────────────────────────────────────────────────
+function classStyle(fc) {
+  if (fc <= 55)  return {c:'#10b981',c2:'#34d399',glow:'rgba(16,185,129,0.5)',bg:'rgba(16,185,129,0.12)'};
+  if (fc <= 70)  return {c:'#22c55e',c2:'#4ade80',glow:'rgba(34,197,94,0.5)', bg:'rgba(34,197,94,0.12)'};
+  if (fc <= 92.5)return {c:'#84cc16',c2:'#a3e635',glow:'rgba(132,204,22,0.5)',bg:'rgba(132,204,22,0.12)'};
+  if (fc <= 125) return {c:'#eab308',c2:'#facc15',glow:'rgba(234,179,8,0.5)', bg:'rgba(234,179,8,0.12)'};
+  if (fc <= 175) return {c:'#f97316',c2:'#fb923c',glow:'rgba(249,115,22,0.5)',bg:'rgba(249,115,22,0.12)'};
+  if (fc <= 300) return {c:'#ef4444',c2:'#f87171',glow:'rgba(239,68,68,0.5)', bg:'rgba(239,68,68,0.12)'};
+  return               {c:'#dc2626',c2:'#b91c1c',glow:'rgba(220,38,38,0.5)', bg:'rgba(220,38,38,0.12)'};
+}
+
+// ─── GAUGE ────────────────────────────────────────────────────────────────────
+function gaugePos(density) {
+  const lo = Math.log10(0.5), hi = Math.log10(55);
+  const d  = Math.max(0.5, Math.min(55, density));
+  return ((Math.log10(d) - lo) / (hi - lo)) * 100;
+}
+
+function updateGauge(density, color) {
+  const dot  = document.getElementById('gauge-dot');
+  const numEl = document.getElementById('density-num');
+  const isMobile = window.innerWidth <= 860;
+  const pos  = gaugePos(density);
+
+  dot.style.color = color;
+  numEl.style.color = color;
+  numEl.textContent = density.toFixed(2);
+
+  if (isMobile) {
+    dot.style.setProperty('--gdot-x', pos + '%');
+    dot.style.left = pos + '%';
+    dot.style.bottom = '50%';
+  } else {
+    dot.style.bottom = pos + '%';
+    dot.style.left = '50%';
+  }
+}
+
+function resetGauge() {
+  const dot  = document.getElementById('gauge-dot');
+  const numEl = document.getElementById('density-num');
+  dot.style.color   = '#818cf8';
+  dot.style.bottom  = '50%';
+  dot.style.left    = '50%';
+  numEl.style.color = 'var(--muted)';
+  numEl.textContent = '—';
+}
+
+// ─── 3D BOX ───────────────────────────────────────────────────────────────────
+function updateBox(L, W, H, faceColor) {
+  const maxDim = Math.max(L, W, H, 0.01);
+  const s  = 70 / maxDim;
+  const sw = W * s, sh = H * s, sd = L * s;
+
+  const box = document.getElementById('box3d');
+  box.style.width  = sw + 'px';
+  box.style.height = sh + 'px';
+
+  const fc = faceColor || 'rgba(129,140,248,0.18)';
+  const bc = faceColor ? faceColor.replace(/[\d.]+\)$/, '0.55)') : 'rgba(129,140,248,0.5)';
+
+  function setFace(id, w, h, transform, brightness) {
+    const el = document.getElementById(id);
+    const alpha = brightness || 1;
+    el.style.width     = w + 'px';
+    el.style.height    = h + 'px';
+    el.style.marginLeft = (-w / 2) + 'px';
+    el.style.marginTop  = (-h / 2) + 'px';
+    el.style.transform  = transform;
+    el.style.background = fc;
+    el.style.border     = `1px solid ${bc}`;
+    el.style.opacity    = alpha;
+  }
+
+  setFace('f-front',  sw, sh, `translateZ(${sd/2}px)`, 1);
+  setFace('f-back',   sw, sh, `rotateY(180deg) translateZ(${sd/2}px)`, 0.5);
+  setFace('f-right',  sd, sh, `rotateY(90deg) translateZ(${sw/2}px)`, 0.8);
+  setFace('f-left',   sd, sh, `rotateY(-90deg) translateZ(${sw/2}px)`, 0.6);
+  setFace('f-top',    sw, sd, `rotateX(-90deg) translateZ(${sh/2}px)`, 0.9);
+  setFace('f-bottom', sw, sd, `rotateX(90deg) translateZ(${sh/2}px)`, 0.4);
+}
+
+// Init default cube
+updateBox(40, 40, 40, null);
+
+// ─── PIECES ───────────────────────────────────────────────────────────────────
+function addPiece() {
+  const id = ++pieceId;
+  pieces.push({id, qty:1, l:'', w:'', h:'', wt:''});
+  renderPieces();
+  // Focus first input of new row
+  setTimeout(() => {
+    const el = document.getElementById(`l-${id}`);
+    if (el) el.focus();
+  }, 50);
+}
+
+function removePiece(id) {
+  pieces = pieces.filter(p => p.id !== id);
+  renderPieces();
+  recalc();
+}
+
+function renderPieces() {
+  const list = document.getElementById('pieces-list');
+  list.innerHTML = '';
+  pieces.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'piece-row';
+    row.innerHTML = `
+      <input type="number" min="1" step="1" value="${p.qty}" placeholder="1"
+             onchange="updateField(${p.id},'qty',this.value)" oninput="updateField(${p.id},'qty',this.value)">
+      <input type="number" min="0" step="0.1" value="${p.l}" placeholder="0"
+             id="l-${p.id}" onchange="updateField(${p.id},'l',this.value)" oninput="updateField(${p.id},'l',this.value)">
+      <input type="number" min="0" step="0.1" value="${p.w}" placeholder="0"
+             onchange="updateField(${p.id},'w',this.value)" oninput="updateField(${p.id},'w',this.value)">
+      <input type="number" min="0" step="0.1" value="${p.h}" placeholder="0"
+             onchange="updateField(${p.id},'h',this.value)" oninput="updateField(${p.id},'h',this.value)">
+      <input type="number" min="0" step="0.1" value="${p.wt}" placeholder="0"
+             onchange="updateField(${p.id},'wt',this.value)" oninput="updateField(${p.id},'wt',this.value)">
+      <button class="del-btn" onclick="removePiece(${p.id})" title="Remove">×</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function updateField(id, field, val) {
+  const p = pieces.find(p => p.id === id);
+  if (p) { p[field] = val; recalc(); }
+}
+
+// ─── UNITS ────────────────────────────────────────────────────────────────────
+function setUnit(type, val, btn) {
+  const toggle = btn.closest('.unit-toggle');
+  toggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (type === 'dim') {
+    dimUnit = val;
+    const lbl = val === 'in' ? '(in)' : '(cm)';
+    document.getElementById('hdr-l').textContent = 'L ' + lbl;
+    document.getElementById('hdr-w').textContent = 'W ' + lbl;
+    document.getElementById('hdr-h').textContent = 'H ' + lbl;
+  } else {
+    wtUnit = val;
+    document.getElementById('hdr-wt').textContent = 'Wt (' + val + ')';
+  }
+  recalc();
+}
+
+function toInches(v) { return dimUnit === 'cm' ? v / 2.54 : v; }
+function toLbs(v)    { return wtUnit  === 'kg' ? v * 2.20462 : v; }
+
+// ─── CALCULATION ──────────────────────────────────────────────────────────────
+function recalc() {
+  let totalWeightLbs = 0;
+  let totalVolFt3    = 0;
+  let totalQty       = 0;
+  let firstL=0, firstW=0, firstH=0, hasFirst=false;
+
+  for (const p of pieces) {
+    const qty = parseFloat(p.qty) || 1;
+    const l   = parseFloat(p.l) || 0;
+    const w   = parseFloat(p.w) || 0;
+    const h   = parseFloat(p.h) || 0;
+    const wt  = parseFloat(p.wt) || 0;
+
+    if (l <= 0 || w <= 0 || h <= 0 || wt <= 0) continue;
+
+    const lin = toInches(l), win = toInches(w), hin = toInches(h);
+    const wlbs = toLbs(wt);
+
+    const volFt3 = (lin * win * hin) / 1728;
+    totalVolFt3    += qty * volFt3;
+    totalWeightLbs += qty * wlbs;
+    totalQty       += qty;
+
+    if (!hasFirst) { firstL=lin; firstW=win; firstH=hin; hasFirst=true; }
+  }
+
+  if (totalVolFt3 === 0 || totalWeightLbs === 0) {
+    resetGauge();
+    showEmpty();
+    if (hasFirst) updateBox(firstL, firstW, firstH, null);
+    else updateBox(40, 40, 40, null);
+    return;
+  }
+
+  const density = totalWeightLbs / totalVolFt3;
+  const fc      = lookupFC(density);
+  const style   = classStyle(fc);
+  const info    = FC_INFO[fc] || {label:'—', desc:''};
+
+  // Update gauge
+  updateGauge(density, style.c);
+
+  // Update box
+  updateBox(firstL, firstW, firstH, style.bg.replace(/[\d.]+\)$/, '0.22)'));
+
+  // Update result card
+  showResult();
+  const cnEl = document.getElementById('class-num');
+  cnEl.textContent = fc;
+  cnEl.style.setProperty('--cc', style.c);
+  cnEl.style.setProperty('--cc2', style.c2);
+  cnEl.style.setProperty('--cg', style.glow);
+  cnEl.classList.remove('bump');
+  void cnEl.offsetWidth; // reflow
+  cnEl.classList.add('bump');
+
+  const badge = document.getElementById('class-badge');
+  badge.textContent = info.label;
+  badge.style.color = style.c;
+  badge.style.background = style.bg;
+  badge.style.borderColor = style.c;
+
+  document.getElementById('sv-weight').textContent  = totalWeightLbs.toFixed(1) + ' lbs';
+  document.getElementById('sv-vol').textContent     = totalVolFt3.toFixed(2) + ' ft³';
+  document.getElementById('sv-density').textContent = density.toFixed(2) + ' lbs/ft³';
+  document.getElementById('sv-pieces').textContent  = totalQty;
+
+  const descEl = document.getElementById('class-desc');
+  descEl.innerHTML = info.desc;
+  descEl.style.borderLeftColor = style.c;
+}
+
+function showEmpty() {
+  document.getElementById('result-empty').style.display   = 'flex';
+  document.getElementById('result-content').style.display = 'none';
+}
+function showResult() {
+  document.getElementById('result-empty').style.display   = 'none';
+  document.getElementById('result-content').style.display = 'block';
+}
+
+// ─── THEME ────────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  const btn = document.getElementById('theme-btn');
+  btn.innerHTML = isDark ? '<span>🌙</span> Dark Mode' : '<span>☀️</span> Light Mode';
+  localStorage.setItem('fc-theme', isDark ? 'light' : 'dark');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(function init() {
+  const saved = localStorage.getItem('fc-theme');
+  if (saved === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('theme-btn').innerHTML = '<span>🌙</span> Dark Mode';
+  }
+  addPiece();
+})();
+</script>
+</body>
+</html>
