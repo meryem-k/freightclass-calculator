@@ -367,6 +367,108 @@ footer{
   font-size:11px;color:var(--muted);
   border-top:1px solid var(--border);
 }
+
+/* ── DIM WEIGHT MODULE ────────────────────────────────────────────────────── */
+.module{
+  position:relative;z-index:1;
+  max-width:1160px;margin:0 auto;
+  padding:0 24px 40px;
+}
+.module-divider{
+  border:none;border-top:1px solid var(--border);
+  margin:0 0 28px;
+}
+.module-header{
+  display:flex;align-items:center;gap:14px;margin-bottom:20px;
+}
+.module-icon{
+  width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,#0ea5e9,#38bdf8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+  box-shadow:0 0 18px rgba(14,165,233,0.4);
+}
+.module-name{
+  font-size:15px;font-weight:700;
+  background:linear-gradient(120deg,var(--text),#38bdf8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.module-sub{
+  font-size:12px;color:var(--muted);margin-top:2px;
+  -webkit-text-fill-color:var(--muted);
+}
+.dim-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:20px;
+}
+@media(max-width:860px){
+  .dim-grid{grid-template-columns:1fr}
+  .module{padding:0 16px 32px}
+}
+.dim-inputs{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  margin-bottom:18px;
+}
+.dim-input-group{display:flex;flex-direction:column;gap:4px}
+.dim-input-group>label{
+  font-size:9px;font-weight:600;color:var(--muted);
+  letter-spacing:0.08em;text-transform:uppercase;
+}
+.carrier-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  margin-bottom:8px;
+}
+.carrier-btn{
+  background:var(--input-bg);border:1.5px solid var(--input-border);
+  border-radius:10px;padding:9px 6px;cursor:pointer;
+  font-family:inherit;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+  transition:all 0.2s;
+}
+.carrier-btn:hover{border-color:#0ea5e9;color:#0ea5e9;background:rgba(14,165,233,0.08)}
+.carrier-btn.active{border-color:#0ea5e9;color:#0ea5e9;background:rgba(14,165,233,0.12)}
+.carrier-btn.carrier-custom:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.carrier-btn.carrier-custom.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.cb-name{font-size:12px;font-weight:700}
+.cb-div{font-size:9px;opacity:0.75;letter-spacing:0.04em}
+.custom-div-row{
+  display:none;align-items:center;gap:10px;
+  padding-top:10px;border-top:1px solid var(--border);
+}
+.custom-div-row label{font-size:11px;color:var(--muted);flex:1}
+.custom-div-row input{width:90px}
+.dim-compare{
+  display:flex;align-items:stretch;gap:10px;
+  margin:4px 0 14px;
+}
+.dim-side{
+  flex:1;text-align:center;
+  background:var(--input-bg);border:1.5px solid var(--input-border);
+  border-radius:14px;padding:14px 8px;
+  transition:border-color 0.3s,background 0.3s;
+}
+.dim-side.winner{border-color:#0ea5e9;background:rgba(14,165,233,0.09)}
+.dim-side-lbl{font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.dim-side-val{font-size:30px;font-weight:800;line-height:1;color:var(--muted);transition:color 0.3s}
+.dim-side.winner .dim-side-val{color:#0ea5e9}
+.dim-side-unit{font-size:10px;color:var(--muted);margin-top:2px}
+.dim-vs{font-size:10px;font-weight:700;color:var(--muted);flex-shrink:0;display:flex;align-items:center}
+.dim-billable{
+  background:rgba(14,165,233,0.08);
+  border:1.5px solid rgba(14,165,233,0.25);
+  border-radius:14px;padding:14px 16px;
+  text-align:center;margin-bottom:12px;transition:all 0.3s;
+}
+.dim-billable-lbl{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.dim-billable-val{font-size:38px;font-weight:900;line-height:1;color:#0ea5e9;transition:color 0.3s}
+.dim-billable-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4}
+.dim-formula{
+  font-size:11px;color:var(--muted);line-height:1.7;
+  padding:10px 13px;
+  background:var(--input-bg);border:1px solid var(--border);
+  border-left:3px solid #0ea5e9;
+  border-radius:0 10px 10px 0;
+}
+.dim-formula strong{color:var(--text);font-weight:600}
 </style>
 </head>
 <body>
@@ -492,6 +594,124 @@ footer{
   </div>
 
 </main>
+
+<!-- ══ DIM WEIGHT MODULE ══════════════════════════════════════════════════════ -->
+<section class="module">
+  <hr class="module-divider">
+  <div class="module-header">
+    <div class="module-icon">✈️</div>
+    <div>
+      <div class="module-name">Dimensional Weight Calculator</div>
+      <div class="module-sub">Compare DIM weight vs actual weight to find your billable weight</div>
+    </div>
+  </div>
+
+  <div class="dim-grid">
+
+    <!-- Input card -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="card-title" style="margin-bottom:0">Package Dimensions</div>
+        <div style="display:flex;gap:8px">
+          <div>
+            <div style="font-size:9px;color:var(--muted);text-align:center;margin-bottom:3px;letter-spacing:0.06em;text-transform:uppercase">Dims</div>
+            <div class="unit-toggle">
+              <button class="active" onclick="setDimUnit('dim','in',this)">IN</button>
+              <button onclick="setDimUnit('dim','cm',this)">CM</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--muted);text-align:center;margin-bottom:3px;letter-spacing:0.06em;text-transform:uppercase">Weight</div>
+            <div class="unit-toggle">
+              <button class="active" onclick="setDimUnit('wt','lbs',this)">LBS</button>
+              <button onclick="setDimUnit('wt','kg',this)">KG</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dim-inputs">
+        <div class="dim-input-group">
+          <label>Length (<span class="dim-dim-unit-lbl">in</span>)</label>
+          <input type="number" id="dim-l" min="0" step="0.1" placeholder="0" oninput="dimRecalc()">
+        </div>
+        <div class="dim-input-group">
+          <label>Width (<span class="dim-dim-unit-lbl">in</span>)</label>
+          <input type="number" id="dim-w" min="0" step="0.1" placeholder="0" oninput="dimRecalc()">
+        </div>
+        <div class="dim-input-group">
+          <label>Height (<span class="dim-dim-unit-lbl">in</span>)</label>
+          <input type="number" id="dim-h" min="0" step="0.1" placeholder="0" oninput="dimRecalc()">
+        </div>
+        <div class="dim-input-group">
+          <label>Weight (<span class="dim-wt-unit-lbl">lbs</span>)</label>
+          <input type="number" id="dim-wt-input" min="0" step="0.1" placeholder="0" oninput="dimRecalc()">
+        </div>
+      </div>
+
+      <div class="card-title">Carrier</div>
+      <div class="carrier-grid" id="carrier-grid">
+        <button class="carrier-btn active" onclick="setCarrier('FedEx',139,this)">
+          <span class="cb-name">FedEx</span><span class="cb-div">÷ 139</span>
+        </button>
+        <button class="carrier-btn" onclick="setCarrier('UPS',139,this)">
+          <span class="cb-name">UPS</span><span class="cb-div">÷ 139</span>
+        </button>
+        <button class="carrier-btn" onclick="setCarrier('USPS',166,this)">
+          <span class="cb-name">USPS</span><span class="cb-div">÷ 166</span>
+        </button>
+        <button class="carrier-btn" onclick="setCarrier('DHL',139,this)">
+          <span class="cb-name">DHL</span><span class="cb-div">÷ 139</span>
+        </button>
+      </div>
+      <button class="carrier-btn carrier-custom" id="carrier-custom-btn"
+              style="width:100%;flex-direction:row;gap:8px;justify-content:center"
+              onclick="setCarrier('Custom',0,this)">
+        <span class="cb-name">Custom</span><span class="cb-div">Enter your own divisor</span>
+      </button>
+
+      <div class="custom-div-row" id="custom-div-row" style="margin-top:10px">
+        <label>Custom divisor</label>
+        <input type="number" id="dim-custom-divisor" min="1" step="1" value="139" oninput="updateCustomDivisor()">
+      </div>
+    </div>
+
+    <!-- Result card -->
+    <div class="card">
+      <div class="card-title">Billable Weight</div>
+
+      <div class="result-empty" id="dim-empty">
+        <div class="big-icon">✈️</div>
+        <p>Enter dimensions and weight to calculate your billable weight</p>
+      </div>
+
+      <div id="dim-result" style="display:none">
+        <div class="dim-compare">
+          <div class="dim-side" id="dim-side-dim">
+            <div class="dim-side-lbl">DIM Weight</div>
+            <div class="dim-side-val" id="dim-wt-out">—</div>
+            <div class="dim-side-unit">lbs</div>
+          </div>
+          <div class="dim-vs">VS</div>
+          <div class="dim-side" id="dim-side-actual">
+            <div class="dim-side-lbl">Actual Weight</div>
+            <div class="dim-side-val" id="dim-actual-out">—</div>
+            <div class="dim-side-unit">lbs</div>
+          </div>
+        </div>
+
+        <div class="dim-billable">
+          <div class="dim-billable-lbl">Billable Weight</div>
+          <div class="dim-billable-val" id="dim-billable-val">—</div>
+          <div class="dim-billable-note" id="dim-billable-note"></div>
+        </div>
+
+        <div class="dim-formula" id="dim-formula"></div>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 <footer>FreightClass · NMFC density-based calculator · For reference only — verify with your carrier</footer>
 
@@ -793,6 +1013,101 @@ function toggleTheme() {
   const btn = document.getElementById('theme-btn');
   btn.innerHTML = isDark ? '<span>🌙</span> Dark Mode' : '<span>☀️</span> Light Mode';
   localStorage.setItem('fc-theme', isDark ? 'light' : 'dark');
+}
+
+// ─── DIM WEIGHT CALCULATOR ────────────────────────────────────────────────────
+let dimDimUnit = 'in';
+let dimWtUnit  = 'lbs';
+let dimDivisor = 139;
+let dimCarrierName = 'FedEx';
+
+function setDimUnit(type, val, btn) {
+  const toggle = btn.closest('.unit-toggle');
+  toggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (type === 'dim') {
+    dimDimUnit = val;
+    document.querySelectorAll('.dim-dim-unit-lbl').forEach(el => el.textContent = val);
+  } else {
+    dimWtUnit = val;
+    document.querySelectorAll('.dim-wt-unit-lbl').forEach(el => el.textContent = val);
+  }
+  dimRecalc();
+}
+
+function setCarrier(name, divisor, btn) {
+  document.querySelectorAll('#carrier-grid .carrier-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('carrier-custom-btn').classList.remove('active');
+  btn.classList.add('active');
+  dimCarrierName = name;
+  const customRow = document.getElementById('custom-div-row');
+  if (name === 'Custom') {
+    dimDivisor = parseFloat(document.getElementById('dim-custom-divisor').value) || 139;
+    customRow.style.display = 'flex';
+  } else {
+    dimDivisor = divisor;
+    customRow.style.display = 'none';
+  }
+  dimRecalc();
+}
+
+function updateCustomDivisor() {
+  dimDivisor = parseFloat(document.getElementById('dim-custom-divisor').value) || 139;
+  dimRecalc();
+}
+
+function dimRecalc() {
+  const l  = parseFloat(document.getElementById('dim-l').value)        || 0;
+  const w  = parseFloat(document.getElementById('dim-w').value)        || 0;
+  const h  = parseFloat(document.getElementById('dim-h').value)        || 0;
+  const wt = parseFloat(document.getElementById('dim-wt-input').value) || 0;
+
+  if (l <= 0 || w <= 0 || h <= 0 || wt <= 0) {
+    document.getElementById('dim-empty').style.display  = 'flex';
+    document.getElementById('dim-result').style.display = 'none';
+    return;
+  }
+
+  const lin  = dimDimUnit === 'cm' ? l / 2.54 : l;
+  const win  = dimDimUnit === 'cm' ? w / 2.54 : w;
+  const hin  = dimDimUnit === 'cm' ? h / 2.54 : h;
+  const wlbs = dimWtUnit  === 'kg' ? wt * 2.20462 : wt;
+
+  const rawDim   = (lin * win * hin) / dimDivisor;
+  const dimWt    = Math.ceil(rawDim);
+  const actWt    = Math.ceil(wlbs);
+  const billable = Math.max(dimWt, actWt);
+
+  document.getElementById('dim-empty').style.display  = 'none';
+  document.getElementById('dim-result').style.display = 'block';
+
+  document.getElementById('dim-wt-out').textContent      = dimWt;
+  document.getElementById('dim-actual-out').textContent  = actWt;
+  document.getElementById('dim-billable-val').textContent = billable + ' lbs';
+
+  const dimSide    = document.getElementById('dim-side-dim');
+  const actualSide = document.getElementById('dim-side-actual');
+  dimSide.classList.remove('winner');
+  actualSide.classList.remove('winner');
+
+  let note;
+  if (dimWt > actWt) {
+    dimSide.classList.add('winner');
+    note = 'DIM weight applies — package is large relative to its weight';
+  } else if (actWt > dimWt) {
+    actualSide.classList.add('winner');
+    note = 'Actual weight applies — package is dense relative to its size';
+  } else {
+    dimSide.classList.add('winner');
+    actualSide.classList.add('winner');
+    note = 'DIM and actual weight are equal';
+  }
+  document.getElementById('dim-billable-note').textContent = note;
+
+  document.getElementById('dim-formula').innerHTML =
+    `<strong>${lin.toFixed(1)}" × ${win.toFixed(1)}" × ${hin.toFixed(1)}"</strong> ÷ ${dimDivisor} ` +
+    `= ${rawDim.toFixed(2)} → rounded up to <strong>${dimWt} lbs</strong> DIM weight` +
+    ` · Carrier: <strong>${dimCarrierName}</strong>`;
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
